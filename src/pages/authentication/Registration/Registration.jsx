@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
-
+import { app } from "../../../firebase/firebase.config";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+const auth = getAuth(app);
 const Registration = () => {
   const handleSignUp = (e) => {
     e.preventDefault();
@@ -8,7 +10,15 @@ const Registration = () => {
     const password = form.password.value;
     const email = form.email.value;
     console.log(name, email, password);
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((res) => {
+        console.log(res.user);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
+
   return (
     <div className="hero bg-base-200 min-h-screen ">
       <div className="hero-content flex-col w-3/5  ">
