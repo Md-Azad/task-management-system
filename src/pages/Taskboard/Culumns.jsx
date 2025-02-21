@@ -8,6 +8,7 @@ const Culumns = ({ culumn, tasks }) => {
   return (
     <div className="bg-gray-400">
       <h1>{culumn.title}</h1>
+
       <div ref={setNodeRef} className="space-y-3 p-4">
         {tasks.map((task) => (
           <TaskCard key={task._id} task={task}></TaskCard>

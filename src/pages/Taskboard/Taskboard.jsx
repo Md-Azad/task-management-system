@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { nanoid } from "nanoid";
 
 import io from "socket.io-client";
 import Culumns from "./Culumns";
@@ -40,15 +41,14 @@ const Taskboard = () => {
     const description = form.description.value;
     const today = new Date();
 
-    // Get the current date, month, and year
     const day = today.getDate();
-    const month = today.getMonth() + 1; // Months are zero-based, so add 1
+    const month = today.getMonth() + 1;
     const year = today.getFullYear();
 
-    // Format the date as desired (e.g., DD/MM/YYYY)
     const formattedDate = `${day}/${month}/${year}`;
 
     const newTask = {
+      id: nanoid(),
       title,
       description,
       status: "TODO",
@@ -74,18 +74,21 @@ const Taskboard = () => {
     };
   }, []);
 
-  console.log(tasks);
-
   function handleDragEnd(event) {
     const { active, over } = event;
     if (!over) return;
     const taskId = active.id;
     const newStatus = over.id;
+    console.log(taskId, newStatus);
     setTasks(() =>
       tasks.map((task) =>
         task.id === taskId ? { ...task, status: newStatus } : task
       )
     );
+    const updatedTask = tasks.find((task) => task.id === taskId);
+    if (updatedTask) {
+      socket.emit("updateTask", { ...updatedTask, status: newStatus });
+    }
   }
 
   return (
