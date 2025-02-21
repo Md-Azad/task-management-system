@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { CiEdit } from "react-icons/ci";
-import { IoMdAddCircleOutline } from "react-icons/io";
-import { MdDeleteOutline } from "react-icons/md";
+
 import io from "socket.io-client";
+import Culumns from "./Culumns";
+import { DndContext } from "@dnd-kit/core";
 
 const socket = io("http://localhost:3000");
 
@@ -10,7 +10,7 @@ const Taskboard = () => {
   const [tasks, setTasks] = useState([]);
   const modalRef = useRef(null);
 
-  const column = [
+  const CULUMNS = [
     { id: "TODO", title: "To-Do" },
     { id: "IN_PROGRESS", title: "In Progress" },
     { id: "DONE", title: "Done" },
@@ -51,7 +51,7 @@ const Taskboard = () => {
     const newTask = {
       title,
       description,
-      status: "To-Do",
+      status: "TODO",
       date: formattedDate,
     };
 
@@ -76,42 +76,31 @@ const Taskboard = () => {
 
   console.log(tasks);
 
-  return (
-    <section className="px-12 my-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div className=" bg-green-400">
-        <div className="flex justify-between px-4 pt-2">
-          <h1 className="text-white text-xl font-bold">To-Do</h1>
+  function handleDragEnd(event) {
+    const { active, over } = event;
+    if (!over) return;
+    const taskId = active.id;
+    const newStatus = over.id;
+    setTasks(() =>
+      tasks.map((task) =>
+        task.id === taskId ? { ...task, status: newStatus } : task
+      )
+    );
+  }
 
-          <button
-            onClick={() => document.getElementById("my_modal_3").showModal()}
-          >
-            <IoMdAddCircleOutline className="text-3xl text-white" />
-          </button>
-        </div>
-        <div className="">
-          {tasks.map((task) => (
-            <div
-              key={task._id}
-              className=" bg-white mx-2 my-2 flex items-center justify-between p-4"
-            >
-              <div>
-                <h1>{task?.title}</h1>
-                <p>{task.description}</p>
-              </div>
-              <div className=" flex items-center justify-center gap-4">
-                <button className="btn bg-yellow-400 ">
-                  <CiEdit className=" text-2xl " />
-                </button>
-                <button className="btn btn-error">
-                  <MdDeleteOutline className=" text-white text-2xl" />
-                </button>
-              </div>
-            </div>
+  return (
+    <section className="px-12 my-12 ">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <DndContext onDragEnd={handleDragEnd}>
+          {CULUMNS.map((culumn) => (
+            <Culumns
+              key={culumn.id}
+              culumn={culumn}
+              tasks={tasks.filter((task) => task.status === culumn.id)}
+            ></Culumns>
           ))}
-        </div>
+        </DndContext>
       </div>
-      <div className="h-32 bg-gray-200"></div>
-      <div className="h-32 bg-orange-200"></div>
 
       {/* modal */}
       {/* You can open the modal using document.getElementById('ID').showModal() method */}
