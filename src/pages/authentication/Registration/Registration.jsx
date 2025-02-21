@@ -1,8 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { app } from "../../../firebase/firebase.config";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+
+import useAxiosPublic from "../../../hooks/useAxiosPublic";
+import useAuth from "../../../hooks/useAuth";
 const auth = getAuth(app);
+
 const Registration = () => {
+  const navigate = useNavigate();
+  const { createUser } = useAuth();
+  const axiosPublic = useAxiosPublic();
   const handleSignUp = (e) => {
     e.preventDefault();
     const form = e.target;
@@ -10,9 +17,21 @@ const Registration = () => {
     const password = form.password.value;
     const email = form.email.value;
     console.log(name, email, password);
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((res) => {
-        console.log(res.user);
+    createUser(auth, email, password)
+      .then((result) => {
+        const user = result.user;
+        if (user?.email) {
+          const userInfo = {
+            uid: user.uid,
+            name,
+            email: email,
+          };
+          axiosPublic.post("/users", userInfo).then((res) => {
+            if (res.data.insertedId) {
+              navigate("/");
+            }
+          });
+        }
       })
       .catch((err) => {
         console.log(err);
