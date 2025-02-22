@@ -71,7 +71,7 @@ const Login = () => {
           <p className="text-center mb-4">
             <small>
               New Here?{" "}
-              <Link to="/signup" className="text-yellow-500">
+              <Link to="/register" className="text-yellow-500">
                 Sign Up Here
               </Link>
             </small>

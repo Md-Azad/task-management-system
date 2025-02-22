@@ -5,10 +5,12 @@ import io from "socket.io-client";
 import Culumns from "./Culumns";
 import { closestCorners, DndContext } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
+import useAuth from "../../hooks/useAuth";
 
 const socket = io("http://localhost:3000");
 
 const Taskboard = () => {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const modalRef = useRef(null);
 
@@ -21,7 +23,9 @@ const Taskboard = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await fetch("http://localhost:3000/tasks");
+        const response = await fetch(
+          `http://localhost:3000/tasks/${user?.email}`
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch tasks");
         }
@@ -33,7 +37,7 @@ const Taskboard = () => {
     };
 
     fetchTasks();
-  }, []);
+  }, [user?.email]);
   useEffect(() => {
     // Listen for task updates from the server
     socket.on("tasksUpdated", (updatedTasks) => {
@@ -66,6 +70,7 @@ const Taskboard = () => {
 
     const newTask = {
       _id: nanoid(),
+      email: user?.email,
       title,
       description,
       status: "TODO",

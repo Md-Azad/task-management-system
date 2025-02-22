@@ -1,15 +1,12 @@
 import Navbar from "../Navbar/Navbar";
-import useAuth from "../../../hooks/useAuth";
-import Login from "../../authentication/Login/Login";
-import Taskboard from "../../Taskboard/Taskboard";
+
+import { Outlet } from "react-router-dom";
 
 const Home = () => {
-  const { user } = useAuth();
   return (
     <section>
       <Navbar></Navbar>
-
-      <>{user?.email ? <Taskboard></Taskboard> : <Login></Login>}</>
+      <Outlet></Outlet>
     </section>
   );
 };
