@@ -18,10 +18,6 @@ const TaskCard = ({ task }) => {
       }
     : undefined;
 
-  //   const showEditModal = () => {
-  //     document.getElementById("editModal").showModal();
-  //   };
-
   const handleEditTask = (e) => {
     e.preventDefault();
     if (!editingTask) return; // Ensure a task is selected
@@ -44,35 +40,12 @@ const TaskCard = ({ task }) => {
     setEditingTask(null);
     form.reset();
   };
+  const handleDeleteTask = (_id) => {
+    socket.emit("deleteTask", _id);
+    console.log("deleted clicked");
+  };
 
   return (
-    // <section>
-    //   <div
-    //     ref={setNodeRef}
-    //     {...listeners}
-    //     {...attributes}
-    //     className="cursor-grab bg-white mx-2 my-2 flex items-center justify-between rounded-lg p-4"
-    //     style={style}
-    //   >
-    //     <div className="border-2 border-red-300 hover:border-green-900">
-    //       <h1 className="font-bold text-xl">{task?.title}</h1>
-    //       <p className="text-gray-400">{task.description}</p>
-    //     </div>
-    //     <div className=" flex items-center justify-center gap-4">
-    //       <button
-    //         onClick={() => testing()}
-    //         className="btn bg-yellow-400 "
-    //         tabIndex="-1"
-    //       >
-    //         <CiEdit className=" text-2xl " />
-    //       </button>
-    //       <button className="btn btn-error" tabIndex="-1">
-    //         <MdDeleteOutline className=" text-white text-2xl" /> click
-    //       </button>
-    //     </div>
-    //   </div>
-    // </section>
-
     <section className="relative">
       <div
         ref={setNodeRef}
@@ -102,7 +75,11 @@ const TaskCard = ({ task }) => {
         >
           <CiEdit className="text-2xl" />
         </button>
-        <button className="btn btn-error" data-no-dnd="true">
+        <button
+          onClick={() => handleDeleteTask(task._id)}
+          className="btn btn-error"
+          data-no-dnd="true"
+        >
           <MdDeleteOutline className="text-white text-2xl" />
         </button>
       </div>
