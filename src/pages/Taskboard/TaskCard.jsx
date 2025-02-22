@@ -4,9 +4,12 @@ import { useRef, useState } from "react";
 import { CiEdit } from "react-icons/ci";
 import { MdDeleteOutline } from "react-icons/md";
 import io from "socket.io-client";
-const socket = io("https://task-management-system-server-1.onrender.com");
+import useAuth from "../../hooks/useAuth";
+// const socket = io("https://task-management-system-server-1.onrender.com");
+const socket = io("http://localhost:3000");
 const TaskCard = ({ task }) => {
   const modalRef = useRef(null);
+  const { dark } = useAuth();
   const [editingTask, setEditingTask] = useState(null);
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: task._id,
@@ -54,12 +57,22 @@ const TaskCard = ({ task }) => {
         ref={setNodeRef}
         {...listeners}
         {...attributes}
-        className="cursor-grab bg-white mx-2 my-2 flex items-center justify-between rounded-lg p-4"
+        className={`cursor-grab ${
+          dark ? "bg-white" : "bg-gray-400"
+        } mx-2 my-2 flex items-center justify-between rounded-lg p-4`}
         style={style}
       >
         <div className="">
-          <h1 className="font-bold text-xl">{task?.title}</h1>
-          <p className="text-gray-400">{task.description}</p>
+          <h1
+            className={`${
+              dark ? "text-gray-700" : "text-white"
+            } font-bold text-2xl`}
+          >
+            {task?.title}
+          </h1>
+          <p className={`${dark ? "text-gray-500" : "text-white"}`}>
+            {task.description}
+          </p>
         </div>
 
         {/* Ensure buttons are clickable */}

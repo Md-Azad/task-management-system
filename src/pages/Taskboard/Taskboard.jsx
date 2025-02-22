@@ -5,10 +5,11 @@ import Culumns from "./Culumns";
 import { DndContext } from "@dnd-kit/core";
 import useAuth from "../../hooks/useAuth";
 
-const socket = io("https://task-management-system-server-1.onrender.com");
+const socket = io("http://localhost:3000");
+// const socket = io("https://task-management-system-server-1.onrender.com");
 
 const Taskboard = () => {
-  const { user } = useAuth();
+  const { user, dark } = useAuth();
   const [tasks, setTasks] = useState([]);
   const modalRef = useRef(null);
 
@@ -21,8 +22,11 @@ const Taskboard = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
+        // const response = await fetch(
+        //   `https://task-management-system-server-1.onrender.com/tasks/${user?.email}`
+        // );
         const response = await fetch(
-          `https://task-management-system-server-1.onrender.com/tasks/${user?.email}`
+          `http://localhost:3000/tasks/${user?.email}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch tasks");
@@ -108,7 +112,7 @@ const Taskboard = () => {
   }
 
   return (
-    <section className="px-12 my-12 ">
+    <section className={`px-12 my-12 ${dark ? "" : "bg-gray-700"} `}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <DndContext onDragEnd={handleDragEnd}>
           {CULUMNS.map((culumn) => (

@@ -14,6 +14,7 @@ const auth = getAuth(app);
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [dark, setDark] = useState("false");
 
   const createUser = (email, password) => {
     setLoading(true);
@@ -42,6 +43,8 @@ const AuthProvider = ({ children }) => {
     setLoading,
     createUser,
     logOut,
+    dark,
+    setDark,
   };
 
   useEffect(() => {
