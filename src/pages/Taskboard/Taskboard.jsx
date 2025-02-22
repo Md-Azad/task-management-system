@@ -113,8 +113,7 @@ const Taskboard = () => {
 
     if (!over) return;
 
-    // Extract the ID of the drop target
-    const overId = over.id.id || over.id; // Handle both object and string cases
+    const overId = over.id.id || over.id;
     console.log("Over ID (Extracted):", overId);
 
     const activeTask = tasks.find((task) => task._id === active.id);
