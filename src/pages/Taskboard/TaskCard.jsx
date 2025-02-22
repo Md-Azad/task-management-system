@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { CiEdit } from "react-icons/ci";
 import { MdDeleteOutline } from "react-icons/md";
 import io from "socket.io-client";
-const socket = io("http://localhost:3000");
+const socket = io("https://task-management-system-server-1.onrender.com");
 const TaskCard = ({ task }) => {
   const modalRef = useRef(null);
   const [editingTask, setEditingTask] = useState(null);
@@ -26,10 +26,13 @@ const TaskCard = ({ task }) => {
     const title = form.title.value;
     const description = form.description.value;
 
-    console.log("Edit clicked:", editingTask._id, title, description);
-
     // Emit updated task data
-    socket.emit("editTask", { _id: editingTask._id, title, description });
+    socket.emit("editTask", {
+      _id: editingTask._id,
+      title,
+      description,
+      email: editingTask.email,
+    });
 
     // Close modal
     if (modalRef.current) {

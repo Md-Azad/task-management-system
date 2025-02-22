@@ -5,7 +5,7 @@ import Culumns from "./Culumns";
 import { DndContext } from "@dnd-kit/core";
 import useAuth from "../../hooks/useAuth";
 
-const socket = io("http://localhost:3000");
+const socket = io("https://task-management-system-server-1.onrender.com");
 
 const Taskboard = () => {
   const { user } = useAuth();
@@ -22,7 +22,7 @@ const Taskboard = () => {
     const fetchTasks = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/tasks/${user?.email}`
+          `https://task-management-system-server-1.onrender.com/tasks/${user?.email}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch tasks");
