@@ -22,12 +22,10 @@ const Taskboard = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        // const response = await fetch(
-        //   `https://task-management-system-server-1.onrender.com/tasks/${user?.email}`
-        // );
         const response = await fetch(
-          `http://localhost:3000/tasks/${user?.email}`
+          `https://task-management-system-server-1.onrender.com/tasks/${user?.email}`
         );
+
         if (!response.ok) {
           throw new Error("Failed to fetch tasks");
         }

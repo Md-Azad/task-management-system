@@ -5,8 +5,8 @@ import { CiEdit } from "react-icons/ci";
 import { MdDeleteOutline } from "react-icons/md";
 import io from "socket.io-client";
 import useAuth from "../../hooks/useAuth";
-// const socket = io("https://task-management-system-server-1.onrender.com");
-const socket = io("http://localhost:3000");
+const socket = io("https://task-management-system-server-1.onrender.com");
+
 const TaskCard = ({ task }) => {
   const modalRef = useRef(null);
   const { dark } = useAuth();
