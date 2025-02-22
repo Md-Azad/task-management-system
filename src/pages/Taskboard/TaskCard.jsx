@@ -1,8 +1,13 @@
 import { useDraggable } from "@dnd-kit/core";
+import { useRef, useState } from "react";
+
 import { CiEdit } from "react-icons/ci";
 import { MdDeleteOutline } from "react-icons/md";
-
+import io from "socket.io-client";
+const socket = io("http://localhost:3000");
 const TaskCard = ({ task }) => {
+  const modalRef = useRef(null);
+  const [editingTask, setEditingTask] = useState(null);
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: task._id,
   });
@@ -12,27 +17,135 @@ const TaskCard = ({ task }) => {
         transform: `translate(${transform.x}px, ${transform.y}px)`,
       }
     : undefined;
+
+  //   const showEditModal = () => {
+  //     document.getElementById("editModal").showModal();
+  //   };
+
+  const handleEditTask = (e) => {
+    e.preventDefault();
+    if (!editingTask) return; // Ensure a task is selected
+
+    const form = e.target;
+    const title = form.title.value;
+    const description = form.description.value;
+
+    console.log("Edit clicked:", editingTask._id, title, description);
+
+    // Emit updated task data
+    socket.emit("editTask", { _id: editingTask._id, title, description });
+
+    // Close modal
+    if (modalRef.current) {
+      modalRef.current.close();
+    }
+
+    // Clear editingTask state
+    setEditingTask(null);
+    form.reset();
+  };
+
   return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      className="cursor-grab bg-white mx-2 my-2 flex items-center justify-between rounded-lg p-4"
-      style={style}
-    >
-      <div>
-        <h1 className="font-bold text-xl">{task?.title}</h1>
-        <p className="text-gray-400">{task.description}</p>
+    // <section>
+    //   <div
+    //     ref={setNodeRef}
+    //     {...listeners}
+    //     {...attributes}
+    //     className="cursor-grab bg-white mx-2 my-2 flex items-center justify-between rounded-lg p-4"
+    //     style={style}
+    //   >
+    //     <div className="border-2 border-red-300 hover:border-green-900">
+    //       <h1 className="font-bold text-xl">{task?.title}</h1>
+    //       <p className="text-gray-400">{task.description}</p>
+    //     </div>
+    //     <div className=" flex items-center justify-center gap-4">
+    //       <button
+    //         onClick={() => testing()}
+    //         className="btn bg-yellow-400 "
+    //         tabIndex="-1"
+    //       >
+    //         <CiEdit className=" text-2xl " />
+    //       </button>
+    //       <button className="btn btn-error" tabIndex="-1">
+    //         <MdDeleteOutline className=" text-white text-2xl" /> click
+    //       </button>
+    //     </div>
+    //   </div>
+    // </section>
+
+    <section className="relative">
+      <div
+        ref={setNodeRef}
+        {...listeners}
+        {...attributes}
+        className="cursor-grab bg-white mx-2 my-2 flex items-center justify-between rounded-lg p-4"
+        style={style}
+      >
+        <div className="">
+          <h1 className="font-bold text-xl">{task?.title}</h1>
+          <p className="text-gray-400">{task.description}</p>
+        </div>
+
+        {/* Ensure buttons are clickable */}
       </div>
-      <div className=" flex items-center justify-center gap-4">
-        <button className="btn bg-yellow-400 ">
-          <CiEdit className=" text-2xl " />
+      <div className="flex items-center justify-center gap-4 absolute top-4 right-4">
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation(); // Ensure it doesn't interfere with drag
+            setEditingTask(task); // Store the correct task for editing
+            modalRef.current.showModal(); // Open the modal
+          }}
+          className="btn bg-yellow-400"
+          data-no-dnd="true"
+          style={{ pointerEvents: "auto" }}
+        >
+          <CiEdit className="text-2xl" />
         </button>
-        <button className="btn btn-error">
-          <MdDeleteOutline className=" text-white text-2xl" />
+        <button className="btn btn-error" data-no-dnd="true">
+          <MdDeleteOutline className="text-white text-2xl" />
         </button>
       </div>
-    </div>
+
+      <dialog ref={modalRef} id="editModal" className="modal">
+        <div className="modal-box">
+          <form method="dialog">
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+              ✕
+            </button>
+          </form>
+          <form onSubmit={(e) => handleEditTask(e)} className="card-body">
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Title</span>
+              </label>
+              <input
+                type="text"
+                name="title"
+                placeholder="Title here"
+                className="input input-bordered"
+                required
+              />
+            </div>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Description</span>
+              </label>
+              <input
+                type="text"
+                name="description"
+                placeholder="Description"
+                className="input input-bordered"
+                required
+              />
+            </div>
+            <div className="form-control mt-6">
+              <input className="btn btn-primary" type="submit" value="Submit" />
+            </div>
+          </form>
+        </div>
+      </dialog>
+    </section>
   );
 };
 

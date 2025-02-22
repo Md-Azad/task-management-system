@@ -7,6 +7,7 @@ const Home = () => {
     <section>
       <Navbar></Navbar>
       <Outlet></Outlet>
+      {/* <Test></Test> */}
     </section>
   );
 };
