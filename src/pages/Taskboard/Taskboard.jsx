@@ -3,7 +3,8 @@ import { nanoid } from "nanoid";
 
 import io from "socket.io-client";
 import Culumns from "./Culumns";
-import { DndContext } from "@dnd-kit/core";
+import { closestCorners, DndContext } from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 
 const socket = io("http://localhost:3000");
 
@@ -33,12 +34,28 @@ const Taskboard = () => {
 
     fetchTasks();
   }, []);
+  useEffect(() => {
+    // Listen for task updates from the server
+    socket.on("tasksUpdated", (updatedTasks) => {
+      console.log("Tasks Updated (From Server):", updatedTasks);
+      setTasks(updatedTasks);
+    });
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      socket.off("tasksUpdated");
+    };
+  }, []);
+
+  const showMod = () => {
+    document.getElementById("my_modal_3").showModal();
+  };
 
   const handeAddTask = (e) => {
     e.preventDefault();
     const form = e.target;
-    const title = form.title.value;
-    const description = form.description.value;
+    const title = form.title?.value;
+    const description = form.description?.value;
     const today = new Date();
 
     const day = today.getDate();
@@ -48,11 +65,12 @@ const Taskboard = () => {
     const formattedDate = `${day}/${month}/${year}`;
 
     const newTask = {
-      id: nanoid(),
+      _id: nanoid(),
       title,
       description,
       status: "TODO",
       date: formattedDate,
+      order: tasks.filter((task) => task.status === "TODO").length + 1,
     };
 
     // Emit task data to WebSocket server
@@ -64,41 +82,136 @@ const Taskboard = () => {
     // Clear form
     form.reset();
   };
-  useEffect(() => {
-    socket.on("tasksUpdated", (updatedTasks) => {
-      setTasks(updatedTasks);
-    });
 
-    return () => {
-      socket.off("tasksUpdated");
-    };
-  }, []);
+  //   working code
+  //   function handleDragEnd(event) {
+  //     const { active, over } = event;
 
-  function handleDragEnd(event) {
+  //     // if (!activeTask || !overTask) return;
+
+  //     if (!over) return;
+  //     const taskId = active.id;
+  //     const newStatus = over.id;
+
+  //     setTasks(() =>
+  //       tasks.map((task) =>
+  //         task.id === taskId ? { ...task, status: newStatus } : task
+  //       )
+  //     );
+  //     const updatedTask = tasks.find((task) => task.id === taskId);
+  //     if (updatedTask) {
+  //       socket.emit("updateTask", { ...updatedTask, status: newStatus });
+  //     }
+  //   }
+
+  //. working for moving vertically
+  const handleDragEnd = (event) => {
     const { active, over } = event;
+
+    console.log("Active ID (Dragged Task):", active.id);
+    console.log("Over ID (Drop Target):", over?.id);
+
     if (!over) return;
-    const taskId = active.id;
-    const newStatus = over.id;
-    console.log(taskId, newStatus);
-    setTasks(() =>
-      tasks.map((task) =>
-        task.id === taskId ? { ...task, status: newStatus } : task
-      )
-    );
-    const updatedTask = tasks.find((task) => task.id === taskId);
-    if (updatedTask) {
-      socket.emit("updateTask", { ...updatedTask, status: newStatus });
+
+    // Extract the ID of the drop target
+    const overId = over.id.id || over.id; // Handle both object and string cases
+    console.log("Over ID (Extracted):", overId);
+
+    const activeTask = tasks.find((task) => task._id === active.id);
+    console.log("Active Task:", activeTask);
+
+    // Check if the drop target is a task or a column
+    const overTask = tasks.find((task) => task.status === overId);
+    const overColumn = CULUMNS.find((column) => column.id === overId);
+
+    console.log("Over Task:", overTask);
+    console.log("Over Column:", overColumn);
+
+    if (!activeTask) return;
+
+    // Scenario 1: Reordering within the same column
+    if (overTask && activeTask.status === overTask.status) {
+      console.log("Reordering within the same column");
+
+      // Fetch tasks for the current column without sorting
+      const columnTasks = tasks.filter(
+        (task) => task.status === activeTask.status
+      );
+
+      console.log("Column Tasks (Before Reordering):", columnTasks);
+      console.log("overid is here", overId);
+
+      const oldIndex = columnTasks.findIndex((task) => task._id === active.id);
+      const newIndex = columnTasks.findIndex((task) => task.status === overId);
+
+      console.log("Old Index:", oldIndex);
+      console.log("New Index:", newIndex);
+
+      if (newIndex === -1) {
+        console.error(
+          "New Index is -1. overId does not match any task in columnTasks."
+        );
+        return;
+      }
+
+      // Reorder tasks
+      const reorderedTasks = arrayMove(columnTasks, oldIndex, newIndex);
+      console.log("Reordered task", reorderedTasks);
+
+      // Update the order property for each task
+      const updatedTasks = tasks.map((task) => {
+        if (task.status === activeTask.status) {
+          const updatedTask = reorderedTasks.find((t) => t._id === task._id);
+          if (updatedTask) {
+            const newOrder = reorderedTasks.indexOf(updatedTask) + 1;
+            return { ...task, order: newOrder };
+          }
+        }
+        return task;
+      });
+
+      console.log("Updated Tasks (After Reordering):", updatedTasks);
+
+      setTasks(updatedTasks);
+      socket.emit("updateTasksOrder", updatedTasks);
     }
-  }
+
+    // Scenario 2: Moving between columns
+    else if (overColumn) {
+      console.log("Moving between columns");
+
+      const updatedTasks = tasks.map((task) => {
+        if (task._id === active.id) {
+          return {
+            ...task,
+            status: overColumn.id, // Update the status to the new column
+            order: tasks.filter((t) => t.status === overColumn.id).length + 1, // Set the order to the last position in the new column
+          };
+        }
+        return task;
+      });
+
+      setTasks(updatedTasks);
+      socket.emit("updateTaskStatus", {
+        ...activeTask,
+        status: overColumn.id,
+        order: tasks.filter((t) => t.status === overColumn.id).length + 1,
+      });
+    }
+  };
 
   return (
     <section className="px-12 my-12 ">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <DndContext onDragEnd={handleDragEnd}>
+        <DndContext
+          collisionDetection={closestCorners}
+          onDragEnd={handleDragEnd}
+        >
           {CULUMNS.map((culumn) => (
             <Culumns
               key={culumn.id}
               culumn={culumn}
+              showMod={showMod}
               tasks={tasks.filter((task) => task.status === culumn.id)}
             ></Culumns>
           ))}

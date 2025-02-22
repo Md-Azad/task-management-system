@@ -4,7 +4,7 @@ import { MdDeleteOutline } from "react-icons/md";
 
 const TaskCard = ({ task }) => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: task.id,
+    id: task._id,
   });
 
   const style = transform
@@ -17,7 +17,7 @@ const TaskCard = ({ task }) => {
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className="cursor-grab bg-white mx-2 my-2 flex items-center justify-between p-4"
+      className="cursor-grab bg-white mx-2 my-2 flex items-center justify-between rounded-lg p-4"
       style={style}
     >
       <div>
