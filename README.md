@@ -1,8 +1,38 @@
-# React + Vite
+# Task Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a simple drag and drop task management app. this app was build using dnd-kit package. For real-time database update web socket is used.
 
-Currently, two official plugins are available:
+Demo: [Live link](https://melodic-shortbread-4aa384.netlify.app)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Dependencies
+
+    - dnd-kit/core
+    - dnd-kit/utilities
+    - dnd-kit/sortable
+    - react router dom
+    - axios
+    - nanoid
+    - web socket client
+
+## installation steps:
+
+- step-1
+  - git clone https://github.com/Md-Azad/task-management-system-server (for server)
+  - git https://github.com/Md-Azad/task-management-system (for client)
+- step-2
+  - cd task-management-system-server
+    -cd task-management-system
+- step-3
+  - npm install
+- step-4
+
+  - npm run dev (for client)
+  - node index.js (for server)
+
+## Technologies used
+
+    - React.js
+    - JavaScript
+    - Express.js
+    - MongoDB
+    - Web Socket io
